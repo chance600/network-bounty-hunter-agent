@@ -1,18 +1,18 @@
-"""Network Bounty Hunter Agent - Main agent implementation."""
+"""Network Bounty Hunter Agent - Connector Matchmaking System.
+
+Monitors LinkedIn posts for needs, matches them with your contacts, facilitates intros.
+"""
 import os
 import json
 import uuid
-from datetime import datetime, timedelta
-from typing import List, Dict
+from datetime import datetime
+from typing import List
 import google.auth
 
 from google.adk.agents import Agent
 from google.adk.apps.app import App
 
-from models import (
-    NeedSpec, Contact, RankedContact, MessageDraft,
-    NeedSpecResponse, RankingResponse, DraftResponse
-)
+from models import Contact
 
 # Configure GCP
 _, project_id = google.auth.default()
@@ -21,30 +21,29 @@ os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 
 # ============================================================================
-# MOCK DATA (for MVP)
+# MOCK DATA - YOUR CONTACT DATABASE
 # ============================================================================
 
-MOCK_CONTACTS = [
+MY_CONTACTS = [
     Contact(
         id="c1",
         name="Sarah Chen",
         title="VP of Packaging Innovation",
         company="GreenPack Solutions",
         location="San Francisco, CA",
-        profile_url="linkedin.com/in/sarachen",
-        relationship_strength=0.7,
-        tags=["packaging", "bioplastics", "sustainability"],
-        source="linkedin_comet"
+        relationship_strength=0.9,
+        tags=["packaging", "bioplastics", "sustainability", "compostable", "materials-science"],
+        notes="Expert in bioplastics. Loves connecting with innovators. Open to consulting."
     ),
     Contact(
         id="c2",
-        name="Michael Rodriguez",
-        title="Materials Engineer",
+        name="Michael Rodriguez",  
+        title="Lead Materials Engineer",
         company="EcoMaterials Inc",
         location="New York, NY",
-        relationship_strength=0.4,
-        tags=["materials", "bioplastics", "R&D"],
-        source="linkedin_comet"
+        relationship_strength=0.7,
+        tags=["materials", "bioplastics", "R&D", "polymer-engineering", "testing"],
+        notes="Technical expert, hands-on with polymer testing. Always willing to help."
     ),
     Contact(
         id="c3",
@@ -53,9 +52,28 @@ MOCK_CONTACTS = [
         company="BioCycle Corp",
         location="Boston, MA",
         relationship_strength=0.8,
-        last_interaction=datetime.now() - timedelta(days=30),
-        tags=["packaging", "compostable", "innovation"],
-        source="manual"
+        tags=["packaging", "compostable", "certification", "regulatory", "supply-chain"],
+        notes="Deep regulatory knowledge. Can help navigate certifications."
+    ),
+    Contact(
+        id="c4",
+        name="James Park",
+        title="Founder & CEO",
+        company="PackTech Ventures",
+        location="Austin, TX",
+        relationship_strength=0.6,
+        tags=["packaging", "investment", "startups", "innovation", "scaling"],
+        notes="Investor in packaging tech. Mentors early-stage founders."
+    ),
+    Contact(
+        id="c5",
+        name="Lisa Thompson",
+        title="Head of Product Development",
+        company="Natural Foods Co",
+        location="Seattle, WA",
+        relationship_strength=0.8,
+        tags=["food-packaging", "consumer-products", "sourcing", "partnerships"],
+        notes="Always looking for sustainable packaging solutions for food products."
     ),
 ]
 
@@ -63,274 +81,236 @@ MOCK_CONTACTS = [
 # AGENT TOOLS
 # ============================================================================
 
-def parse_need_spec(user_input: str) -> str:
+def extract_need_from_post(post_text: str, author_name: str = "someone") -> str:
     """
-    Parse user's free-text need into structured NeedSpec.
+    Extract what someone needs from their LinkedIn post.
     
     Args:
-        user_input: Free text like "I need a packaging engineer with bioplastics experience in NYC"
+        post_text: The full text of the LinkedIn post
+        author_name: Name of the person who posted
         
     Returns:
-        JSON string of NeedSpec with extracted objective, persona, geography, keywords
+        JSON with extracted need: {"author", "need_type", "keywords", "context"}
     """
-    # This is a simplified parser - in production, use LLM with structured output
+    post_lower = post_text.lower()
+    
+    # Detect need patterns
     keywords = []
-    geography = []
-    objective_type = "intro"
+    need_type = "unknown"
     
-    input_lower = user_input.lower()
+    # Common patterns
+    if "looking for" in post_lower or "need" in post_lower or "seeking" in post_lower:
+        if "packaging" in post_lower:
+            keywords.append("packaging")
+        if "bioplastic" in post_lower or "bio-plastic" in post_lower:
+            keywords.append("bioplastics")
+        if "sustainable" in post_lower or "sustainability" in post_lower:
+            keywords.append("sustainability")
+        if "material" in post_lower:
+            keywords.append("materials")
+        if "engineer" in post_lower:
+            keywords.append("engineer")
+        if "supplier" in post_lower or "vendor" in post_lower:
+            keywords.append("supplier")
+        if "investor" in post_lower or "funding" in post_lower:
+            keywords.append("investment")
+        if "partner" in post_lower:
+            keywords.append("partnerships")
+        if "advice" in post_lower or "help" in post_lower:
+            keywords.append("advice")
+        if "certification" in post_lower or "certified" in post_lower:
+            keywords.append("certification")
+        if "food" in post_lower:
+            keywords.append("food-packaging")
+            
+        # Determine need type
+        if "hire" in post_lower or "hiring" in post_lower:
+            need_type = "hire"
+        elif "invest" in post_lower or "funding" in post_lower:
+            need_type = "investment"
+        elif "partner" in post_lower:
+            need_type = "partnership"
+        elif "supplier" in post_lower or "vendor" in post_lower:
+            need_type = "supplier"
+        else:
+            need_type = "advice/intro"
     
-    # Extract keywords
-    if "packaging" in input_lower:
-        keywords.append("packaging")
-    if "bioplastics" in input_lower or "bioplastic" in input_lower:
-        keywords.append("bioplastics")
-    if "engineer" in input_lower:
-        keywords.append("engineer")
-    if "compostable" in input_lower:
-        keywords.append("compostable")
-    if "sustainable" in input_lower or "sustainability" in input_lower:
-        keywords.append("sustainability")
-        
-    # Extract geography
-    if "nyc" in input_lower or "new york" in input_lower:
-        geography.append("New York, NY")
-    if "sf" in input_lower or "san francisco" in input_lower:
-        geography.append("San Francisco, CA")
-    if "boston" in input_lower:
-        geography.append("Boston, MA")
-        
-    # Determine objective
-    if "hire" in input_lower or "hiring" in input_lower:
-        objective_type = "hire"
-    elif "partner" in input_lower:
-        objective_type = "partner"
-    elif "raise" in input_lower or "investor" in input_lower:
-        objective_type = "raise"
-        
-    need_spec = NeedSpec(
-        id=str(uuid.uuid4()),
-        raw_input=user_input,
-        objective_type=objective_type,
-        target_persona={"keywords": keywords},
-        geography=geography if geography else None,
-        keywords_must=keywords,
-        keywords_avoid=[],
-        time_urgency="medium"
-    )
+    result = {
+        "author": author_name,
+        "need_type": need_type,
+        "keywords": keywords,
+        "context": post_text[:200]  # First 200 chars for context
+    }
     
-    response = NeedSpecResponse(need_spec=need_spec)
-    return json.dumps(response.model_dump(), default=str)
+    return json.dumps(result)
 
 
-def rank_contacts(need_spec_json: str, top_n: int = 5) -> str:
+def find_matching_contacts(need_json: str, top_n: int = 3) -> str:
     """
-    Rank contacts based on NeedSpec criteria.
+    Find contacts from YOUR network who could help with the posted need.
     
     Args:
-        need_spec_json: JSON string of NeedSpec
-        top_n: Number of top contacts to return
+        need_json: JSON from extract_need_from_post
+        top_n: Number of top matches to return
         
     Returns:
-        JSON string of RankingResponse with ranked contacts
+        JSON with matched contacts and match scores
     """
-    start_time = datetime.now()
+    need = json.loads(need_json)
+    keywords = need.get("keywords", [])
     
-    # Parse NeedSpec
-    need_data = json.loads(need_spec_json)
-    if "need_spec" in need_data:
-        need_data = need_data["need_spec"]
+    if not keywords:
+        return json.dumps({"matches": [], "message": "No clear need detected in post"})
     
-    keywords_must = need_data.get("keywords_must", [])
-    geography = need_data.get("geography", [])
+    matches = []
     
-    ranked = []
-    
-    for contact in MOCK_CONTACTS:
-        # Calculate relevance score
+    for contact in MY_CONTACTS:
+        # Calculate match score
         relevance = 0
-        for keyword in keywords_must:
-            if any(keyword.lower() in tag.lower() for tag in contact.tags):
-                relevance += 0.3
-            if contact.title and keyword.lower() in contact.title.lower():
-                relevance += 0.2
+        matching_tags = []
+        
+        for keyword in keywords:
+            for tag in contact.tags:
+                if keyword.lower() in tag.lower() or tag.lower() in keyword.lower():
+                    relevance += 0.25
+                    matching_tags.append(tag)
+        
         relevance = min(relevance, 1.0)
         
-        # Relationship score (already in contact)
-        relationship = contact.relationship_strength
+        # Boost by relationship strength (you know them well = better intro)
+        final_score = (0.7 * relevance) + (0.3 * contact.relationship_strength)
         
-        # Recency score
-        recency = 0.5  # Default
-        if contact.last_interaction:
-            days_since = (datetime.now() - contact.last_interaction).days
-            if days_since <= 30:
-                recency = 1.0
-            elif days_since <= 90:
-                recency = 0.7
-            else:
-                recency = 0.3
-        else:
-            recency = 0.8  # Never contacted - fresh opportunity
-            
-        # Geography match
-        geo_match = False
-        if geography and contact.location:
-            for geo in geography:
-                if geo.lower() in contact.location.lower():
-                    geo_match = True
-                    break
-        
-        # Calculate final score
-        # Score = 0.4*Relevance + 0.3*Relationship + 0.2*Recency + 0.1*Geo
-        score = (0.4 * relevance + 
-                 0.3 * relationship + 
-                 0.2 * recency +
-                 (0.1 if geo_match else 0))
-        
-        justification = f"Relevance: {relevance:.2f} (keyword matches), "
-        justification += f"Relationship: {relationship:.2f}, "
-        justification += f"Recency: {recency:.2f}"
-        if geo_match:
-            justification += ", Geographic match"
-        
-        ranked.append(RankedContact(
-            contact=contact,
-            rank_score=score,
-            rank_justification=justification,
-            relevance_score=relevance,
-            relationship_score=relationship,
-            recency_score=recency
-        ))
+        if relevance > 0.2:  # Only include if somewhat relevant
+            matches.append({
+                "contact": contact.model_dump(),
+                "match_score": round(final_score, 2),
+                "relevance": round(relevance, 2),
+                "matching_expertise": list(set(matching_tags)),
+                "why_good_match": f"{contact.name} has expertise in {', '.join(list(set(matching_tags))[:3])}"
+            })
     
     # Sort by score
-    ranked.sort(key=lambda x: x.rank_score, reverse=True)
-    ranked = ranked[:top_n]
+    matches.sort(key=lambda x: x["match_score"], reverse=True)
+    matches = matches[:top_n]
     
-    elapsed_ms = (datetime.now() - start_time).total_seconds() * 1000
+    result = {
+        "author_need": need.get("author", "someone") + " needs " + need.get("need_type", "help"),
+        "keywords": keywords,
+        "matches": matches,
+        "total_found": len(matches)
+    }
     
-    response = RankingResponse(
-        ranked_contacts=ranked,
-        total_candidates=len(MOCK_CONTACTS),
-        ranking_time_ms=elapsed_ms
-    )
-    
-    return json.dumps(response.model_dump(), default=str)
+    return json.dumps(result, default=str)
 
 
-def generate_outreach_drafts(contact_json: str, need_context: str = "") -> str:
+def generate_intro_message(match_json: str, to_poster: bool = True) -> str:
     """
-    Generate personalized outreach drafts for a contact.
+    Generate introduction message to facilitate the connection.
     
     Args:
-        contact_json: JSON string of Contact
-        need_context: Context about what user needs
+        match_json: JSON with a single match from find_matching_contacts
+        to_poster: If True, message to person who posted. If False, message to your contact.
         
     Returns:
-        JSON string of DraftResponse with LinkedIn DM and email drafts
+        Draft message text
     """
-    start_time = datetime.now()
+    match = json.loads(match_json)
     
-    contact_data = json.loads(contact_json)
-    if "contact" in contact_data:
-        contact_data = contact_data["contact"]
+    if isinstance(match, dict) and "matches" in match:
+        # Handle full result
+        if not match["matches"]:
+            return "No matches found to introduce"
+        match = match["matches"][0]
     
-    name = contact_data.get("name", "there")
-    title = contact_data.get("title", "")
-    company = contact_data.get("company", "")
+    contact = match["contact"]
+    expertise = match.get("matching_expertise", [])
     
-    # LinkedIn DM (150 char limit)
-    linkedin_dm = f"Hi {name.split()[0]}, impressed by your work in {title.split()[-2] if title else 'packaging'}. "
-    linkedin_dm += "Would love to connect and learn about your experience. Coffee chat?"
+    if to_poster:
+        # Message to the person who posted the need
+        message = f"Hi! Saw your post and thought I could help connect you with someone perfect.\n\n"
+        message += f"I'd like to introduce you to {contact['name']}, {contact['title']} at {contact['company']}. "
+        message += f"They have deep expertise in {', '.join(expertise[:2])} which aligns directly with what you're looking for.\n\n"
+        message += f"Notes: {contact.get('notes', 'They are excellent in their field.')}\n\n"
+        message += f"Would you be open to a quick intro call? Happy to facilitate."
+    else:
+        # Message to your contact asking if they're interested
+        message = f"Hi {contact['name'].split()[0]},\n\n"
+        message += f"I came across someone on LinkedIn who's looking for help with {', '.join(expertise[:2])} - "
+        message += f"right up your alley!\n\n"
+        message += f"They seem like a great fit for your expertise. Would you be open to a quick intro? "
+        message += f"Happy to connect you if you have 15-20 mins to chat with them.\n\n"
+        message += f"Let me know!"
     
-    # Email (short, professional)
-    email_subject = f"Quick intro - {need_context.split()[0:4]}"
-    email_body = f"Hi {name},\n\n"
-    email_body += f"I came across your profile and was impressed by your work as {title} at {company}.\n\n"
-    email_body += f"I'm working on {need_context.lower()} and thought you'd be a great person to connect with given your experience in {', '.join(contact_data.get('tags', ['this space'])[:2])}.\n\n"
-    email_body += "Would you be open to a brief 15-20 minute call to learn from your experience?\n\n"
-    email_body += "Best regards"
-    
-    drafts = [
-        MessageDraft(
-            channel="linkedin_dm",
-            body=linkedin_dm,
-            char_count=len(linkedin_dm)
-        ),
-        MessageDraft(
-            channel="email",
-            subject=email_subject,
-            body=email_body,
-            char_count=len(email_body)
-        )
-    ]
-    
-    elapsed_ms = (datetime.now() - start_time).total_seconds() * 1000
-    
-    response = DraftResponse(
-        drafts=drafts,
-        contact_id=contact_data.get("id", "unknown"),
-        generation_time_ms=elapsed_ms
-    )
-    
-    return json.dumps(response.model_dump(), default=str)
+    return message
 
 
-def create_pipeline_summary(ranked_contacts_json: str) -> str:
+def create_opportunity_summary(matches_json: str) -> str:
     """
-    Create a summary of the pipeline with next actions.
+    Create a summary of connector opportunities with action items.
     
     Args:
-        ranked_contacts_json: JSON string of RankingResponse
+        matches_json: JSON from find_matching_contacts
         
     Returns:
-        Human-readable summary of pipeline with recommendations
+        Human-readable summary
     """
-    data = json.loads(ranked_contacts_json)
-    ranked = data.get("ranked_contacts", [])
+    data = json.loads(matches_json)
+    matches = data.get("matches", [])
     
-    if not ranked:
-        return "No contacts matched your criteria. Try broadening your search."
+    if not matches:
+        return "No connector opportunities found. Keep monitoring for posts that match your network's expertise."
     
-    summary = f"Found {len(ranked)} strong candidates:\n\n"
+    summary = f"**CONNECTOR OPPORTUNITY**\n\n"
+    summary += f"Someone needs: {', '.join(data.get('keywords', []))}\n\n"
+    summary += f"Found {len(matches)} contacts from your network who could help:\n\n"
     
-    for i, rc in enumerate(ranked, 1):
-        contact = rc["contact"]
-        summary += f"{i}. **{contact['name']}** - {contact['title']} at {contact['company']}\n"
-        summary += f"   Score: {rc['rank_score']:.2f} | {rc['rank_justification']}\n"
-        summary += f"   Next action: Draft personalized outreach\n\n"
+    for i, match in enumerate(matches, 1):
+        contact = match["contact"]
+        summary += f"{i}. **{contact['name']}** ({contact['title']}) - Match: {match['match_score']}\n"
+        summary += f"   Expertise: {', '.join(match['matching_expertise'])}\n"
+        summary += f"   Why: {match['why_good_match']}\n\n"
     
-    summary += "\nRecommendations:\n"
-    summary += "- Start with top 3 contacts for highest ROI\n"
-    summary += "- Draft personalized messages (avoid templates)\n"
-    summary += "- Schedule follow-up for non-responders in 5-7 days\n"
+    summary += f"\n**NEXT ACTIONS:**\n"
+    summary += f"1. Message your top contact ({matches[0]['contact']['name']}) to gauge interest\n"
+    summary += f"2. If interested, intro them to the person who posted\n"
+    summary += f"3. Track outcome - successful intros build your connector reputation\n\n"
+    summary += f"**VALUE**: By facilitating this intro, you:\n"
+    summary += f"- Help someone in your network find what they need\n"
+    summary += f"- Strengthen relationship with your contact by sending them opportunities\n"
+    summary += f"- Build reputation as a valuable connector\n"
     
     return summary
 
 
 # ============================================================================
-# AGENT DEFINITION
+# AGENT DEFINITION  
 # ============================================================================
 
 root_agent = Agent(
-    name="network_bounty_hunter",
+    name="connector_agent",
     model="gemini-2.5-flash",
     instruction="""
-    You are a Network Bounty Hunter Agent that helps users find and connect with the right people.
+    You are a Connector Agent that helps people facilitate valuable introductions.
     
-    When a user says "I need X", you:
-    1. Parse their need into structured criteria using parse_need_spec
-    2. Rank contacts based on relevance using rank_contacts
-    3. Generate personalized outreach drafts using generate_outreach_drafts
-    4. Provide a pipeline summary with next actions
+    Your workflow:
+    1. When you see a LinkedIn post expressing a need, use extract_need_from_post
+    2. Find matching contacts from the user's network using find_matching_contacts
+    3. Generate intro messages using generate_intro_message
+    4. Provide an opportunity summary with clear next actions
     
-    Always be helpful, concise, and actionable. Explain your reasoning but keep it brief.
-    Focus on the top 3-5 most relevant contacts to avoid overwhelming the user.
+    You create VALUE by:
+    - Helping people find what they need through warm intros
+    - Sending your contacts relevant opportunities  
+    - Building the user's reputation as a connector
+    
+    Always explain WHY each match is good and what the user should do next.
+    Be enthusiastic about connector opportunities - they're valuable for everyone!
     """,
     tools=[
-        parse_need_spec,
-        rank_contacts,
-        generate_outreach_drafts,
-        create_pipeline_summary
+        extract_need_from_post,
+        find_matching_contacts,
+        generate_intro_message,
+        create_opportunity_summary
     ],
 )
 
