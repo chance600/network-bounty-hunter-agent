@@ -1,0 +1,16 @@
+# Network Bounty Hunter Agent - Connector Matchmaking System
+# Python dependencies for Google Cloud Platform Agent Starter Pack (adk_base)
+
+# Core ADK dependencies
+google-adk>=0.1.0
+
+# Google Cloud Platform
+google-cloud-aiplatform>=1.60.0
+google-auth>=2.29.0
+
+# Data processing
+pydantic>=2.7.0
+python-dateutil>=2.9.0
+
+# Utilities
+typing-extensions>=4.11.0
