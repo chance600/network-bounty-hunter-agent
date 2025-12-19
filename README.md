@@ -1,20 +1,21 @@
 # Network Bounty Hunter Agent 🎯
 
-**AI-powered network monitoring and outreach agent** that turns "I need X" into ranked contacts, tailored outreach drafts, follow-up schedules, and a pipeline board.
+**AI-powered LinkedIn connector matchmaking system** that monitors LinkedIn posts for "I need X" requests and intelligently matches them with relevant contacts from your network.
 
 Built with [Google Cloud Platform Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) (adk_base).
 
 ## ✨ What It Does
 
-Simply tell the agent what you need:
+This agent transforms your LinkedIn network into a powerful matchmaking engine:
 
-> "I need a packaging engineer with bioplastics experience in NYC"
+**Tell the agent about a LinkedIn post:**
+> "I saw a post: Need sustainable packaging supplier for food products"
 
-The agent will:
-1. **Parse** your need into structured criteria
-2. **Rank** contacts from your network based on relevance, relationship strength, and recency
-3. **Generate** personalized LinkedIn DMs and email drafts
-4. **Recommend** next actions with a pipeline summary
+**The agent will:**
+1. **Extract** the need from the post (e.g., sustainable packaging expertise, food industry experience)
+2. **Match** contacts from your network based on skills, industry, and relevance
+3. **Generate** personalized introduction messages tailored to the opportunity
+4. **Summarize** the opportunity with actionable next steps
 
 ## 🚀 Quick Start
 
@@ -33,158 +34,153 @@ cd network-bounty-hunter-agent
 # Install dependencies
 pip install -r requirements.txt
 
-# Or use uv (recommended)
-uv pip install -r requirements.txt
+# Configure Google Cloud (if not already done)
+export GOOGLE_CLOUD_PROJECT="your-project-id"
+export GOOGLE_CLOUD_LOCATION="global"
+export GOOGLE_GENAI_USE_VERTEXAI="True"
 ```
 
-### Run the Agent
+### Usage
 
 ```bash
-# Set up GCP authentication
-gcloud auth application-default login
-
-# Run the agent
+# Start the agent in chat mode
 cd app
 python -m google.adk.cli chat agent:app
 ```
 
-### Example Interaction
-
+**Example conversation:**
 ```
-You: I need a packaging engineer with bioplastics experience in NYC
+You: I saw this LinkedIn post: "Looking for a React developer with 5+ years experience for fintech startup in SF"
 
-Agent: I'll help you find the right packaging engineer with bioplastics expertise in NYC.
+Agent: I've analyzed the post and found 3 strong matches from your network:
 
-[Parsing need...]
-[Ranking contacts...]
+1. Sarah Chen (Relevance: 9.5/10)
+   - Senior React Developer at Stripe
+   - 7 years experience
+   - Based in San Francisco
+   - Skills match: React, TypeScript, Fintech
 
-Found 3 strong candidates:
+2. Michael Rodriguez (Relevance: 8.7/10)
+   ...
 
-1. **Michael Rodriguez** - Materials Engineer at EcoMaterials Inc
-   Score: 0.68 | Relevance: 0.90 (keyword matches), Relationship: 0.40, Recency: 0.80, Geographic match
-   Next action: Draft personalized outreach
+Would you like me to generate an introduction message for Sarah?
 
-2. **Sarah Chen** - VP of Packaging Innovation at GreenPack Solutions
-   Score: 0.62 | Relevance: 0.90 (keyword matches), Relationship: 0.70, Recency: 0.80
-   Next action: Draft personalized outreach
+You: Yes, generate intro for Sarah
 
-3. **Dr. Amy Wong** - Director of Sustainable Packaging at BioCycle Corp
-   Score: 0.60 | Relevance: 0.60 (keyword matches), Relationship: 0.80, Recency: 1.00
-   Next action: Draft personalized outreach
+Agent: Here's a personalized introduction:
 
-Recommendations:
-- Start with top 3 contacts for highest ROI
-- Draft personalized messages (avoid templates)
-- Schedule follow-up for non-responders in 5-7 days
+"Hi [Post Author],
+
+I noticed your search for a React developer with fintech experience. I'd like to introduce you to Sarah Chen, a Senior React Developer at Stripe with over 7 years of experience building production-grade fintech applications..."
 ```
 
-## 📂 Project Structure
+## 🛠️ Architecture
 
-```
-network-bounty-hunter-agent/
-├── app/
-│   ├── agent.py       # Main agent with ADK tools
-│   └── models.py      # Pydantic data models
-├── docs/
-│   └── IMPLEMENTATION_PLAN.md  # Detailed architecture
-├── README.md
-├── requirements.txt
-└── LICENSE
-```
+### Core Components
 
-## 🛠️ Core Features
+- **`app/agent.py`** - Main agent with 4 connector tools:
+  - `extract_need_from_post` - Parses LinkedIn posts to identify needs
+  - `find_matching_contacts` - Ranks contacts by relevance
+  - `generate_intro_message` - Creates personalized introductions
+  - `create_opportunity_summary` - Provides actionable summaries
 
-### 1. **NeedSpec Parser**
-Extracts structured criteria from free text:
-- Objective type (intro/hire/partner/raise)
-- Target persona keywords
-- Geography preferences
-- Time urgency
+- **`app/models.py`** - Data models:
+  - `Contact` - Network contact with skills, industry, location
+  - `Need` - Extracted requirements from posts
+  - `OpportunitySummary` - Matchmaking results and recommendations
 
-### 2. **Contact Ranker**
-Scores contacts using:
-- **Relevance** (40%): Keyword matches in tags/title
-- **Relationship** (30%): Connection strength
-- **Recency** (20%): Last interaction date
-- **Geography** (10%): Location match
+### Contact Database
 
-### 3. **Draft Generator**
-Creates personalized outreach:
-- LinkedIn DM (150 char limit)
-- Email with custom subject/body
-- Grounded in contact's role, company, tags
-
-### 4. **Pipeline Summary**
-Provides actionable next steps:
-- Ranked contact list with justifications
-- Recommended outreach order
-- Follow-up scheduling guidance
-
-## 🔧 Configuration
-
-### Mock Data (Current MVP)
-The agent uses mock contacts in `agent.py`. To add your real contacts:
+The agent uses a mock contact database in `app/agent.py`. Replace `MY_CONTACTS` with your actual network data:
 
 ```python
-MOCK_CONTACTS = [
+MY_CONTACTS = [
     Contact(
-        id="unique-id",
-        name="Your Contact",
-        title="Their Title",
+        id="c1",
+        name="Your Contact Name",
+        title="Their Job Title",
         company="Their Company",
+        industry="Their Industry",
         location="City, State",
-        relationship_strength=0.7,  # 0-1
-        tags=["keyword1", "keyword2"],
-        source="linkedin_comet"
+        skills=["Skill 1", "Skill 2", "Skill 3"],
+        relationship_strength=9,  # 1-10 scale
+        linkedin_url="https://linkedin.com/in/username"
     ),
+    # Add more contacts...
 ]
 ```
 
-### Future: Database Integration
-See [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) for:
-- PostgreSQL schema
-- Signal ingestion (LinkedIn via Comet, RSS, news)
-- Real-time pipeline board
+## 📋 Use Cases
 
-## 📊 Roadmap
+### 1. Talent Matchmaking
+**Post:** "Hiring: ML Engineer with NLP experience for healthcare startup"
+**Agent:** Matches contacts with ML/NLP skills in healthcare industry
 
-- [x] Core agent with ADK tools
-- [x] Data models (Pydantic)
-- [x] Mock contacts for testing
-- [x] NeedSpec parser
-- [x] Contact ranking algorithm
-- [x] Draft generation
-- [x] Pipeline summary
-- [ ] PostgreSQL database
-- [ ] Signal ingestion (LinkedIn via Comet)
-- [ ] Web UI (React/Next.js)
-- [ ] Real-time pipeline board
-- [ ] Follow-up scheduling
-- [ ] Email integration
-- [ ] Deployment to Cloud Run
+### 2. Business Development
+**Post:** "Looking for sustainable packaging suppliers for CPG brand"
+**Agent:** Finds contacts in packaging/manufacturing with sustainability focus
 
-## 📖 Documentation
+### 3. Partnership Opportunities
+**Post:** "Seeking co-founder with ops experience for SaaS startup"
+**Agent:** Identifies contacts with operations background and startup experience
 
-- **[Implementation Plan](docs/IMPLEMENTATION_PLAN.md)**: Complete architecture, data models, deployment strategy
-- **[Agent Starter Pack Docs](https://googlecloudplatform.github.io/agent-starter-pack/)**: ADK framework documentation
+### 4. Consulting/Advisory
+**Post:** "Need expert in FDA regulatory compliance for medical devices"
+**Agent:** Matches regulatory affairs professionals in medical device sector
+
+## 🔧 Customization
+
+### Adjust Matching Algorithm
+
+Edit scoring logic in `find_matching_contacts()` tool:
+
+```python
+# Adjust weights for different factors
+skill_match_weight = 0.4  # 40% weight on skills
+industry_match_weight = 0.3  # 30% weight on industry
+relationship_weight = 0.2  # 20% weight on relationship strength
+location_weight = 0.1  # 10% weight on location proximity
+```
+
+### Custom Introduction Templates
+
+Modify message generation in `generate_intro_message()` tool to match your style.
+
+## 🧪 Testing
+
+```bash
+# Test with sample scenarios
+python -m google.adk.cli chat agent:app
+
+# Sample test inputs:
+> "Post says: Need React dev in NYC"
+> "Show me matches for: sustainable packaging supplier"
+> "Generate intro for contact ID c1"
+```
+
+## 📚 Documentation
+
+See `docs/IMPLEMENTATION_PLAN.md` for detailed implementation notes and architecture decisions.
+
+## 🔐 Privacy & Security
+
+- Contact data stays local (no scraping)
+- No automated LinkedIn posting
+- You maintain full control over introductions
+- All API calls use authenticated Google Cloud services
+
+## 📝 License
+
+MIT License - see LICENSE file
 
 ## 🤝 Contributing
 
-Contributions welcome! See the [implementation plan](docs/IMPLEMENTATION_PLAN.md) for areas to contribute.
+Contributions welcome! Please open an issue or PR.
 
-## 📄 License
+## 🙏 Acknowledgments
 
-MIT License - see [LICENSE](LICENSE) file
-
-## 🙏 Built With
-
-- [Google Agent Development Kit (ADK)](https://github.com/google/adk-python)
-- [Gemini 2.5 Flash](https://ai.google.dev/)
-- [Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack)
-- [Pydantic](https://docs.pydantic.dev/)
+Built with [Google Cloud Platform Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack)
 
 ---
 
-**Status**: ✅ MVP Complete - Ready for Testing
-
-Need help? Check the [implementation plan](docs/IMPLEMENTATION_PLAN.md) or open an issue!
+**Ready to turn your network into a matchmaking engine?** Star this repo and start connecting! ⭐
