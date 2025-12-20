@@ -314,4 +314,4 @@ root_agent = Agent(
     ],
 )
 
-app = App(root_agent=root_agent, name="network-bounty-hunter-agent")
+app = App(root_agent=root_agent, name="network_bounty_hunter_agent")
