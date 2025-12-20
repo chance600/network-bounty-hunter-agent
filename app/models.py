@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class NeedSpec(BaseModel):
     """Structured representation of user's networking need."""
     id: str
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now())
     user_id: str = "default_user"
     raw_input: str  # "I need X"
     objective_type: Literal["intro", "hire", "sell", "raise", "partner", "advisor", "press"]
@@ -49,7 +49,7 @@ class PersonLead(BaseModel):
     why_relevant: str = ""
     confidence: float = Field(default=0.5, ge=0, le=1)
     mutuals: Optional[int] = None
-    last_seen: datetime = Field(default_factory=datetime.now)
+    last_seen: datetime = Field(default_factory=lambda: datetime.now())
 
 
 class CompanyLead(BaseModel):
@@ -90,7 +90,7 @@ class SignalDump(BaseModel):
     id: str
     source: Literal["linkedin_comet", "rss", "news", "jobs", "grants", "github", "events", "manual"]
     run_id: str
-    run_ts: datetime = Field(default_factory=datetime.now)
+    run_ts: datetime = Field(default_factory=lambda: datetime.now())
     query_pack_id: Optional[str] = None
     items: List[SignalItem] = Field(default_factory=list)
 
@@ -142,8 +142,8 @@ class PipelineCard(BaseModel):
     next_action_date: Optional[datetime] = None
     status_tags: List[str] = Field(default_factory=list)
     outcome: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now())
+    updated_at: datetime = Field(default_factory=lambda: datetime.now())
 
 
 # ============================================================================
