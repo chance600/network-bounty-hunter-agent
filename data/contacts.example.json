@@ -1,0 +1,134 @@
+[
+  {
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "linkedin_url": "https://linkedin.com/in/janesmith",
+    "skills": [
+      "React",
+      "TypeScript",
+      "Node.js",
+      "Product Design",
+      "UX/UI"
+    ],
+    "industry": "Technology",
+    "current_company": "TechCorp Inc.",
+    "current_role": "Senior Frontend Engineer",
+    "location": "San Francisco, CA",
+    "relationship": "close colleague",
+    "relationship_context": "Worked together for 3 years at previous company",
+    "last_interaction": "2025-01-10",
+    "notes": "Loves helping startups, very responsive, expertise in React ecosystem. Open to consulting opportunities.",
+    "interests": ["startup mentorship", "open source", "web performance"],
+    "availability": "open to side projects"
+  },
+  {
+    "name": "Michael Chen",
+    "email": "michael.chen@example.com",
+    "linkedin_url": "https://linkedin.com/in/michaelchen",
+    "skills": [
+      "Python",
+      "Machine Learning",
+      "Data Science",
+      "TensorFlow",
+      "MLOps"
+    ],
+    "industry": "Artificial Intelligence",
+    "current_company": "AI Labs",
+    "current_role": "ML Research Scientist",
+    "location": "New York, NY",
+    "relationship": "former classmate",
+    "relationship_context": "Met at Stanford, stay in touch quarterly",
+    "last_interaction": "2024-12-20",
+    "notes": "PhD in ML, published researcher. Happy to review ML projects and provide technical advice.",
+    "interests": ["AI ethics", "research collaboration", "teaching"],
+    "availability": "available for advisory roles"
+  },
+  {
+    "name": "Sarah Johnson",
+    "email": "sarah.j@example.com",
+    "linkedin_url": "https://linkedin.com/in/sarahjohnson",
+    "skills": [
+      "Marketing Strategy",
+      "Content Marketing",
+      "SEO",
+      "Growth Hacking",
+      "Brand Development"
+    ],
+    "industry": "Marketing & Advertising",
+    "current_company": "Growth Partners",
+    "current_role": "VP of Marketing",
+    "location": "Austin, TX",
+    "relationship": "professional acquaintance",
+    "relationship_context": "Met at conference 2 years ago, connected on LinkedIn",
+    "last_interaction": "2024-11-15",
+    "notes": "B2B SaaS marketing expert, ran successful campaigns for several unicorns. Always happy to give quick marketing advice.",
+    "interests": ["startup marketing", "content strategy", "community building"],
+    "availability": "limited availability"
+  },
+  {
+    "name": "David Rodriguez",
+    "email": "david.r@example.com",
+    "linkedin_url": "https://linkedin.com/in/davidrodriguez",
+    "skills": [
+      "iOS Development",
+      "Swift",
+      "SwiftUI",
+      "Mobile Architecture",
+      "App Design"
+    ],
+    "industry": "Mobile Development",
+    "current_company": "Mobile Innovations",
+    "current_role": "Lead iOS Engineer",
+    "location": "Seattle, WA",
+    "relationship": "close friend",
+    "relationship_context": "Best friends since college, hang out regularly",
+    "last_interaction": "2025-01-14",
+    "notes": "Built apps with 10M+ downloads. Very generous with his time, loves to help friends and their networks.",
+    "interests": ["indie apps", "SwiftUI", "developer tools"],
+    "availability": "highly available"
+  },
+  {
+    "name": "Emily Park",
+    "email": "emily.park@example.com",
+    "linkedin_url": "https://linkedin.com/in/emilypark",
+    "skills": [
+      "Graphic Design",
+      "Illustration",
+      "Branding",
+      "Figma",
+      "Adobe Creative Suite"
+    ],
+    "industry": "Design & Creative",
+    "current_company": "Freelance",
+    "current_role": "Brand Designer & Illustrator",
+    "location": "Portland, OR",
+    "relationship": "client turned friend",
+    "relationship_context": "Hired for a project 2 years ago, became friends",
+    "last_interaction": "2025-01-05",
+    "notes": "Specializes in podcast cover art and brand identity for creators. Very active on LinkedIn, loves networking.",
+    "interests": ["podcast branding", "illustration", "creator economy"],
+    "availability": "actively seeking projects"
+  },
+  {
+    "name": "Robert Williams",
+    "email": "rob.williams@example.com",
+    "linkedin_url": "https://linkedin.com/in/robertwilliams",
+    "skills": [
+      "DevOps",
+      "Kubernetes",
+      "AWS",
+      "CI/CD",
+      "Infrastructure as Code"
+    ],
+    "industry": "Cloud Infrastructure",
+    "current_company": "CloudScale Systems",
+    "current_role": "Principal DevOps Engineer",
+    "location": "Denver, CO",
+    "relationship": "former colleague",
+    "relationship_context": "Worked on same team for 1 year",
+    "last_interaction": "2024-10-30",
+    "notes": "Infrastructure expert, helped scale multiple startups. Can provide guidance on cloud architecture and cost optimization.",
+    "interests": ["cloud native", "open source tools", "platform engineering"],
+    "availability": "limited availability"
+  }
+]
