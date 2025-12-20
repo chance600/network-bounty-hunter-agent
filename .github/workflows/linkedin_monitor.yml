@@ -1,0 +1,52 @@
+name: LinkedIn Network Monitor
+
+# Schedule: Run weekdays at 9 AM EST
+on:
+  schedule:
+    - cron: '0 14 * * 1-5'  # 9 AM EST = 2 PM UTC
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  monitor_linkedin:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install perplexity-api  # For search integration
+      
+      - name: Run LinkedIn Monitor
+        env:
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+          GOOGLE_CLOUD_LOCATION: global
+          GOOGLE_GENAI_USE_VERTEXAI: "True"
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: |
+          python automation/linkedin_monitor.py
+      
+      - name: Process Matches
+        run: |
+          cd app
+          python -m automation.process_matches
+      
+      - name: Send Notification
+        if: success()
+        run: |
+          echo "✅ LinkedIn monitoring completed successfully!"
+          # Add email/Slack notification here
+      
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkedin-matches-${{ github.run_number }}
+          path: output/matches_*.json
+          retention-days: 30
