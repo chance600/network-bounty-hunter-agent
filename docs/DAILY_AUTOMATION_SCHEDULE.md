@@ -390,3 +390,230 @@ Questions about setup?
 - Read: `docs/BOUNTY_MONETIZATION_STRATEGY.md`
 
 **Ready to automate your bounty hunting? Start with bookmark folder today!** 🚀💰
+
+---
+
+## 🚀 PLATFORM-SPECIFIC SETUP GUIDES
+
+### 🔍 Perplexity Tasks (Scheduled Searches)
+
+**URL:** https://www.perplexity.ai/account/tasks?tab=scheduled
+
+**Setup Steps:**
+
+1. **Create a scheduled task:**
+   - Go to Perplexity > Account > Tasks
+   - Click "+ Create task"
+   - Enter your search query
+   - Set schedule (Daily at 9:00 AM EST recommended)
+   - Choose notification method (email or in-app)
+
+2. **Recommended LinkedIn Search Tasks:**
+
+**Task 1: General Hiring Posts**
+- Query: `Find recent LinkedIn posts from the past 24 hours where people say "I need" or "looking for" help with hiring a designer, developer, engineer, or consultant`
+- Schedule: Daily at 9:00 AM
+- Delivers: 5-10 posts to your email/Perplexity Library
+
+**Task 2: Urgent Opportunities**
+- Query: `LinkedIn posts from today with "urgent" OR "ASAP" OR "immediately" + "need" + "designer" OR "developer"`
+- Schedule: Daily at 1:00 PM  
+- Delivers: High-priority opportunities
+
+**Task 3: Startup Hiring (High Value)**
+- Query: `LinkedIn posts: "startup" + "just raised" OR "series A" + "hiring" OR "looking for first" + "designer" OR "engineer" - past 24 hours`
+- Schedule: Daily at 6:00 AM
+- Delivers: Funded startups = higher contract values
+
+**Task 4: Freelance/Contract Work**
+- Query: `LinkedIn: "freelance" OR "contract" OR "project" + "need" + "designer" OR "developer" - 24 hours`
+- Schedule: Daily at 5:00 PM
+- Delivers: Shorter-term gigs
+
+3. **Where results appear:**
+   - Email notifications with summaries
+   - Perplexity Library (Tasks tab)
+   - In-app notifications
+
+4. **Best practices:**
+   - Start with 2-3 tasks, add more once working
+   - Check Library daily for full results
+   - Refine queries based on quality of results
+   - Perplexity saves history for 30 days
+
+---
+
+### 🚀 Grok Tasks (X.com Scheduled Research)
+
+**URL:** https://grok.com/tasks
+
+**Setup Steps:**
+
+1. **Create a Grok task:**
+   - Go to grok.com/tasks
+   - Click "+ Create task"
+   - Describe what you want to monitor
+   - Set frequency (Daily recommended)
+   - Choose time (10:00 AM EST suggested)
+
+2. **Recommended LinkedIn Discovery Tasks:**
+
+**Task 1: LinkedIn Hiring Mentions**
+- Description: `Find LinkedIn posts from today where people are asking for help finding designers, developers, engineers, or consultants. Include the person's name, role, company, and what they need.`
+- Schedule: Daily at 10:00 AM
+- Delivers: 5-15 posts with context
+
+**Task 2: Cross-Platform LinkedIn Signals**
+- Description: `Search X/Twitter for tweets where people share or mention their LinkedIn posts about needing to hire someone. Focus on posts from the last 24 hours.`
+- Schedule: Daily at 2:00 PM
+- Delivers: Secondary signal + validation
+
+**Task 3: Trending Hiring Topics**
+- Description: `What roles are trending in hiring discussions on LinkedIn today? Focus on tech, design, and consulting roles. Include specific examples.`
+- Schedule: Daily at 8:00 AM
+- Delivers: Market intelligence
+
+3. **Where results appear:**
+   - Grok delivers results directly in your history
+   - Creates a new chat thread for each task run
+   - Accessible via grok.com > History > [Your task name]
+
+4. **Best practices:**
+   - Grok is great for real-time/trending data
+   - Use for cross-referencing Perplexity results
+   - Good for finding "hot" opportunities
+   - Can find posts Perplexity might miss
+
+---
+
+### 🔥 OpenScouts (Continuous Monitoring)
+
+**URL:** https://openscouts.firecrawl.dev/scouts
+
+**Setup Steps:**
+
+1. **Create a scout:**
+   - Go to openscouts.firecrawl.dev
+   - Click "+ New Scout"
+   - Configure monitoring parameters
+   - Set frequency (Daily)
+   - Add notification webhooks/emails
+
+2. **Recommended LinkedIn Scouts:**
+
+**Scout 1: LinkedIn "I Need" Monitor**
+- Name: `LinkedIn I Need Posts`
+- Search query: `LinkedIn posts "I need" designer OR developer OR engineer OR consultant`
+- Frequency: Daily at 7:00 AM
+- Notification: Email summary
+- Delivers: Continuous monitoring with daily digest
+
+**Scout 2: Startup Hiring Announcements**
+- Name: `Startup Hiring LinkedIn`
+- Search query: `LinkedIn "startup" "hiring" "first" designer OR engineer`  
+- Frequency: Daily at 10:00 AM
+- Notification: Slack webhook (optional)
+- Delivers: High-value opportunities
+
+**Scout 3: LinkedIn Job Post Aggregator**
+- Name: `LinkedIn Looking For Posts`
+- Search query: `LinkedIn "looking for" freelance OR contract designer developer`
+- Frequency: Daily at 3:00 PM
+- Notification: Email
+- Delivers: Contractor-focused opportunities
+
+3. **Where results appear:**
+   - OpenScouts dashboard
+   - Email notifications
+   - Webhook integrations (Slack, Discord, etc.)
+   - API endpoint (for custom integrations)
+
+4. **Best practices:**
+   - OpenScouts runs in background 24/7
+   - Set multiple scouts for different keywords
+   - Use webhooks to auto-feed into your agent
+   - Great for catching posts outside typical hours
+   - Can monitor specific LinkedIn profiles
+
+---
+
+## 🔄 Complete Daily Workflow with All 3 Platforms
+
+### Morning (9-10 AM):
+1. **Perplexity task runs** (9:00 AM) → Check email/Library
+2. **Grok task runs** (10:00 AM) → Check Grok history
+3. **OpenScouts digest** (7:00 AM) → Already in inbox
+
+**Action:** Collect all posts into one doc/spreadsheet
+
+### Midday (12-1 PM):
+- **Perplexity second task** (1:00 PM) → Urgent posts
+- **Grok cross-platform check** (2:00 PM) → Validation
+
+**Action:** Process top 5 posts through your agent
+
+### Afternoon (3-5 PM):
+- **OpenScouts afternoon digest** (3:00 PM)
+- **Perplexity freelance task** (5:00 PM)
+
+**Action:** Send outreach to 2-3 best matches
+
+---
+
+## 📊 Expected Coverage
+
+**With all 3 platforms running daily:**
+- Perplexity: 10-15 posts/day (4 tasks × 3-4 posts each)
+- Grok: 5-10 posts/day (3 tasks × 2-3 posts each)  
+- OpenScouts: 8-12 posts/day (3 scouts × 3-4 posts each)
+
+**Total: 23-37 raw posts/day**
+
+After deduplication: **15-25 unique high-quality opportunities/day**
+
+**Weekly: 105-175 opportunities**  
+**Monthly: 450-750 opportunities** 🚀
+
+---
+
+## ✅ Quick Setup Checklist
+
+**Today (30 minutes):**
+- [ ] Go to Perplexity Tasks, create 2 scheduled searches
+- [ ] Go to Grok Tasks, create 1 daily task
+- [ ] Go to OpenScouts, create 1 scout
+- [ ] Test by checking tomorrow morning
+
+**Tomorrow:**
+- [ ] Check all 3 platforms for results
+- [ ] Collect posts into tracking doc
+- [ ] Process top 3 through your agent
+- [ ] Send 1 outreach message
+
+**This Week:**
+- [ ] Add 2 more tasks to each platform
+- [ ] Track which platform gives best results
+- [ ] Refine search queries
+- [ ] Close your first deal! 💰
+
+**This Month:**
+- [ ] Optimize to 4+ tasks per platform
+- [ ] Set up webhook integrations
+- [ ] Hit 20+ outreach messages/week
+- [ ] Earn $1,000+ in referral fees
+
+---
+
+## 📞 Support & Resources
+
+**Platform Documentation:**
+- Perplexity Tasks: https://www.perplexity.ai/help/tasks
+- Grok Tasks: https://grok.com/help
+- OpenScouts Guide: https://docs.firecrawl.dev/openscouts
+
+**Your Agent Docs:**
+- Setup: `docs/QUICK_START.md`
+- Monetization: `docs/BOUNTY_MONETIZATION_STRATEGY.md`  
+- Output: `docs/OUTPUT_AND_NOTIFICATIONS.md`
+
+**Ready to automate? Set up your first task on each platform today!** 🚀🤖💰
